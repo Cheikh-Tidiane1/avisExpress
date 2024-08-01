@@ -17,6 +17,7 @@ public class UtilisateurService {
 
     private UtilisateurRepository utilisateurRepository;
     private BCryptPasswordEncoder passwordEncoder;
+    private ValidationService validationService;
 
     public void inscription(Utilisateur utilisateur) {
         if(!utilisateur.getEmail().contains("@")){
@@ -34,6 +35,7 @@ public class UtilisateurService {
         utilisateur.setRole(roleUtilisateur);
         String hashedPassword = passwordEncoder.encode(utilisateur.getPassword());
         utilisateur.setPassword(hashedPassword);
-        utilisateurRepository.save(utilisateur);
+        utilisateur = utilisateurRepository.save(utilisateur);
+        this.validationService.enregistrer(utilisateur);
     }
 }

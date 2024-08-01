@@ -17,7 +17,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 public class ValidationService {
 
     private ValidationRepository validationRepository;
-
+    private NotificationService notificationService;
     public void enregistrer (Utilisateur utilisateur) {
         Validation validation = Validation.builder()
                 .code(String.format("%06d", new Random().nextInt(999999)))
@@ -26,5 +26,6 @@ public class ValidationService {
                 .expire(Instant.now().plus(10,MINUTES))
                 .build();
         this.validationRepository.save(validation);
+        this.notificationService.envoyer(validation);
     }
 }
