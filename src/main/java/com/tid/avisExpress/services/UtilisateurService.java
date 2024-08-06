@@ -58,6 +58,6 @@ public class UtilisateurService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
+        return this.utilisateurRepository.findByEmail(username).orElseThrow(()-> new UsernameNotFoundException("Utilisateur non trouvé"));
     }
 }
