@@ -5,18 +5,22 @@ import com.tid.avisExpress.model.Utilisateur;
 import com.tid.avisExpress.model.Validation;
 import com.tid.avisExpress.repository.UtilisateurRepository;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
-
+@NoArgsConstructor
 @AllArgsConstructor
 @Service
 @Slf4j
-public class UtilisateurService {
+public class UtilisateurService implements UserDetailsService {
 
     private UtilisateurRepository utilisateurRepository;
     private BCryptPasswordEncoder passwordEncoder;
@@ -50,5 +54,10 @@ public class UtilisateurService {
         Utilisateur utilisateurActif = this.utilisateurRepository.findById(validation.getUtilisateur().getId()).orElseThrow(()-> new RuntimeException("Utilisateur inconnu"));
         utilisateurActif.setActif(true);
         this.utilisateurRepository.save(utilisateurActif);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return null;
     }
 }
