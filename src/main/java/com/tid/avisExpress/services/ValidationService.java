@@ -28,4 +28,8 @@ public class ValidationService {
         this.validationRepository.save(validation);
         this.notificationService.envoyer(validation);
     }
+
+    public Validation valideCode  (String code){
+       return  this.validationRepository.findByCode(code).orElseThrow(() -> new RuntimeException("Le code " + code + " n'existe pas"));
+    }
 }
