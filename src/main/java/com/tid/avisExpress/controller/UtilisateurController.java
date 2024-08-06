@@ -1,9 +1,13 @@
 package com.tid.avisExpress.controller;
+import com.tid.avisExpress.dto.AuthenticationDto;
 import com.tid.avisExpress.model.Utilisateur;
 import com.tid.avisExpress.services.UtilisateurService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -13,13 +17,14 @@ import java.util.Map;
 @Slf4j
 public class UtilisateurController {
 
+    private AuthenticationManager authenticationManager;
     private UtilisateurService utilisateurService;
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(path = "/inscription")
     public void inscription(@RequestBody Utilisateur utilisateur) {
         log.info("Inscription success ✅");
-        utilisateurService.inscription(utilisateur);
+        this.utilisateurService.inscription(utilisateur);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -27,5 +32,15 @@ public class UtilisateurController {
     public void activation(@RequestBody Map<String,String> activation) {
         log.info("Activation success ✅");
         utilisateurService.activation(activation);
+    }
+
+
+    @PostMapping(path = "/connexion")
+    public Map<String,String> activation(@RequestBody AuthenticationDto authenticationDto) {
+        Authentication authenticate = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(authenticationDto.username(), authenticationDto.password())
+        );
+        log.info("résultat {}", authenticate.isAuthenticated());
+        return null ;
     }
 }

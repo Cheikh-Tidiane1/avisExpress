@@ -1,6 +1,7 @@
 package com.tid.avisExpress.security;
 
 import com.tid.avisExpress.services.UtilisateurService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,6 +27,7 @@ public class SecurityConfigurationApplication {
                 .authorizeHttpRequests(
                         authorize -> authorize.requestMatchers(HttpMethod.POST,"/inscription").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/activation").permitAll()
+                                .requestMatchers(HttpMethod.POST,"/connexion").permitAll()
                                 .anyRequest().authenticated()
                 ).build();
     }
@@ -41,14 +43,9 @@ public class SecurityConfigurationApplication {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        return new UtilisateurService();
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
+    public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(this.userDetailsService());
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
         daoAuthenticationProvider.setPasswordEncoder(this.passwordEncoder());
         return daoAuthenticationProvider;
     }
