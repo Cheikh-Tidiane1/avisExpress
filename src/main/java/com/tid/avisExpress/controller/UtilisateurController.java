@@ -1,6 +1,7 @@
 package com.tid.avisExpress.controller;
 import com.tid.avisExpress.dto.AuthenticationDto;
 import com.tid.avisExpress.model.Utilisateur;
+import com.tid.avisExpress.security.JwtService;
 import com.tid.avisExpress.services.UtilisateurService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ public class UtilisateurController {
 
     private AuthenticationManager authenticationManager;
     private UtilisateurService utilisateurService;
+    private JwtService jwtService ;
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(path = "/inscription")
@@ -40,7 +42,9 @@ public class UtilisateurController {
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationDto.username(), authenticationDto.password())
         );
-        log.info("résultat {}", authenticate.isAuthenticated());
+        if(authenticate.isAuthenticated()) {
+            return this.jwtService.getJwtToken(authenticationDto.username());
+        }
         return null ;
     }
 }
