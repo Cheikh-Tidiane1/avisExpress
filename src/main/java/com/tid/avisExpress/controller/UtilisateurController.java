@@ -36,7 +36,7 @@ public class UtilisateurController {
 
 
     @PostMapping(path = "/connexion")
-    public Map<String,String> activation(@RequestBody AuthenticationDto authenticationDto) {
+    public Map<String,String> connexion(@RequestBody AuthenticationDto authenticationDto) {
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationDto.username(), authenticationDto.password())
         );
