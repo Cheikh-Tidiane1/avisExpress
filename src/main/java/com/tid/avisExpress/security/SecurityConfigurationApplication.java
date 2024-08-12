@@ -22,9 +22,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfigurationApplication {
 
+    private BCryptPasswordEncoder passwordEncoder;
     private JwtFilter jwtFilter;
     @Autowired
-    public SecurityConfigurationApplication(JwtFilter jwtFilter) {
+    public SecurityConfigurationApplication(BCryptPasswordEncoder passwordEncoder, JwtFilter jwtFilter) {
+        this.passwordEncoder = passwordEncoder;
         this.jwtFilter = jwtFilter;
     }
 
@@ -46,10 +48,7 @@ public class SecurityConfigurationApplication {
                 .build();
     }
 
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -60,7 +59,7 @@ public class SecurityConfigurationApplication {
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-        daoAuthenticationProvider.setPasswordEncoder(this.passwordEncoder());
+        daoAuthenticationProvider.setPasswordEncoder(this.passwordEncoder);
         return daoAuthenticationProvider;
     }
 }

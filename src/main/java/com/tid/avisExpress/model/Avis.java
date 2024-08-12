@@ -15,5 +15,8 @@ public class Avis {
     private Integer id;
     private String message;
     private String status;
+    @ManyToOne
+    @JoinColumn(name = "idutilisateur")
+    private Utilisateur utilisateur;
 
 }

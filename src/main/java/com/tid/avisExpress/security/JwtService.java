@@ -30,10 +30,6 @@ public class JwtService {
         return Keys.hmacShaKeyFor(decoder);
     }
 
-    public String getUsername(String token) {
-        return null ;
-    }
-
     public Boolean isTokenExpired(String token) {
         Date expirationDate = this.getClaim(token, Claims::getExpiration);
         return expirationDate.before(new Date());
@@ -44,13 +40,15 @@ public class JwtService {
     }
 
     private Map<String, String> generateJwtToken(Utilisateur utilisateur) {
-
-        Map<String, String> claims = Map.of(
-                "nom", utilisateur.getNom(),
-                "email", utilisateur.getEmail()
-        );
         long currentTime = System.currentTimeMillis();
         long expirationTime = currentTime + 18000000;
+
+        Map<String, Object> claims = Map.of(
+                "nom", utilisateur.getNom(),
+                Claims.EXPIRATION, new Date(expirationTime),
+                Claims.SUBJECT,utilisateur.getEmail()
+        );
+
         String bearer = Jwts.builder()
                 .setSubject(utilisateur.getNom())
                 .setIssuedAt(new Date(currentTime))
@@ -73,6 +71,5 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token).getBody();
     }
-
 
 }
