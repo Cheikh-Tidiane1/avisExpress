@@ -1,6 +1,7 @@
 package com.tid.avisExpress.security;
 import com.tid.avisExpress.model.Utilisateur;
 import com.tid.avisExpress.services.UtilisateurService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.Function;
 
 @AllArgsConstructor
 @Service
@@ -20,6 +22,25 @@ public class JwtService {
     public Map<String, String> getJwtToken(String username) {
         Utilisateur utilisateur = (Utilisateur) this.utilisateurService.loadUserByUsername(username);
         return this.generateJwtToken(utilisateur);
+    }
+
+
+    public Key getKey() {
+        byte[] decoder = Decoders.BASE64.decode(ENCRYPTION_KEY);
+        return Keys.hmacShaKeyFor(decoder);
+    }
+
+    public String getUsername(String token) {
+        return null ;
+    }
+
+    public Boolean isTokenExpired(String token) {
+        Date expirationDate = this.getClaim(token, Claims::getExpiration);
+        return expirationDate.before(new Date());
+    }
+
+    public String ExtractUsername(String token) {
+        return this.getClaim(token, Claims::getSubject);
     }
 
     private Map<String, String> generateJwtToken(Utilisateur utilisateur) {
@@ -40,9 +61,18 @@ public class JwtService {
         return Map.of("token", bearer);
     }
 
-    public Key getKey() {
-        byte[] decoder = Decoders.BASE64.decode(ENCRYPTION_KEY);
-        return Keys.hmacShaKeyFor(decoder);
+
+    private <T> T getClaim(String token, Function<Claims, T> claimsResolver) {
+        Claims claims = getAllClaims(token);
+        return claimsResolver.apply(claims);
     }
+
+    private Claims getAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(this.getKey())
+                .build()
+                .parseClaimsJws(token).getBody();
+    }
+
 
 }
