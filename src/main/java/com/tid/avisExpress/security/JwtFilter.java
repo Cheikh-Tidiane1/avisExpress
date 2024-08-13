@@ -1,4 +1,5 @@
 package com.tid.avisExpress.security;
+import com.tid.avisExpress.model.Jwt;
 import com.tid.avisExpress.services.UtilisateurService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Service
 public class JwtFilter extends OncePerRequestFilter {
@@ -29,18 +31,20 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String token = null ;
+        Jwt jwtBd = null;
+        String token;
         String username = null;
         Boolean isTokenExpired = true;
 
         String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.startsWith("Bearer ")) {
             token = authorization.substring(7);
+            jwtBd = this.jwtService.tokenByValue(token);
             isTokenExpired = jwtService.isTokenExpired(token);
             username = jwtService.ExtractUsername(token);
         }
 
-        if (!isTokenExpired && username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+        if (!isTokenExpired && jwtBd.getUtilisateur().getEmail().equals(username) && SecurityContextHolder.getContext().getAuthentication() == null){
             UserDetails userDetails = this.utilisateurService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);

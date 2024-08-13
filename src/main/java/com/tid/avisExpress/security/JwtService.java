@@ -37,6 +37,9 @@ public class JwtService {
         return jwtMap;
     }
 
+    public Jwt tokenByValue(String token) {
+        return this.jwtRepository.findByValeur(token).orElseThrow(() -> new RuntimeException("Unknown token"));
+    }
 
     public Key getKey() {
         byte[] decoder = Decoders.BASE64.decode(ENCRYPTION_KEY);
@@ -84,5 +87,6 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token).getBody();
     }
+
 
 }
