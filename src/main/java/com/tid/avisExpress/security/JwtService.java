@@ -1,5 +1,7 @@
 package com.tid.avisExpress.security;
+import com.tid.avisExpress.model.Jwt;
 import com.tid.avisExpress.model.Utilisateur;
+import com.tid.avisExpress.repository.JwtRepository;
 import com.tid.avisExpress.services.UtilisateurService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -16,12 +18,23 @@ import java.util.function.Function;
 @AllArgsConstructor
 @Service
 public class JwtService {
+
+    public static final String BEARER = "bearer";
     private final String ENCRYPTION_KEY = "c2fcf73009e0f67e893a63614b10ef16f9c78e153127f73dbf3e4fae8164139f";
+    private JwtRepository jwtRepository ;
     private UtilisateurService utilisateurService;
 
     public Map<String, String> getJwtToken(String username) {
         Utilisateur utilisateur = (Utilisateur) this.utilisateurService.loadUserByUsername(username);
-        return this.generateJwtToken(utilisateur);
+        Map<String, String> jwtMap = this.generateJwtToken(utilisateur);
+        Jwt jwt = Jwt.builder()
+                .valeur(jwtMap.get(BEARER))
+                .desactive(false)
+                .expired(false)
+                .utilisateur(utilisateur)
+                .build();
+        this.jwtRepository.save(jwt);
+        return jwtMap;
     }
 
 
@@ -56,7 +69,7 @@ public class JwtService {
                 .setClaims(claims)
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
-        return Map.of("token", bearer);
+        return Map.of(BEARER, bearer);
     }
 
 
