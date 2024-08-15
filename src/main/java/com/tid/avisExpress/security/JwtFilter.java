@@ -39,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.startsWith("Bearer ")) {
             token = authorization.substring(7);
-            jwtBd = this.jwtService.tokenByValue(token);
+            jwtBd = this.jwtService.checkTokenValue(token);
             isTokenExpired = jwtService.isTokenExpired(token);
             username = jwtService.ExtractUsername(token);
         }

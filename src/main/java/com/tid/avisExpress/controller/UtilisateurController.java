@@ -47,4 +47,11 @@ public class UtilisateurController {
         }
         return null ;
     }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(path = "/deconnexion")
+    public void deconnexion() {
+        log.info("Déconnexion success ✅");
+        this.jwtService.deconnexion();
+    }
 }
