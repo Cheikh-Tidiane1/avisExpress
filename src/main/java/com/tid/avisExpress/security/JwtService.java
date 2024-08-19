@@ -9,14 +9,22 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
+import java.util.stream.Collectors;
+@Transactional
 @AllArgsConstructor
+@Slf4j
 @Service
 public class JwtService {
 
@@ -27,8 +35,10 @@ public class JwtService {
 
     public Map<String, String> getJwtToken(String username) {
         Utilisateur utilisateur = (Utilisateur) this.utilisateurService.loadUserByUsername(username);
+        this.disableTokens(utilisateur);
         Map<String, String> jwtMap = this.generateJwtToken(utilisateur);
-        Jwt jwt = Jwt.builder()
+        Jwt jwt = Jwt
+                .builder()
                 .valeur(jwtMap.get(BEARER))
                 .desactive(false)
                 .expired(false)
@@ -39,7 +49,11 @@ public class JwtService {
     }
 
     public Jwt checkTokenValue(String token) {
-        return this.jwtRepository.findByValeur(token).orElseThrow(() -> new RuntimeException("Unknown token"));
+        return this.jwtRepository.findByValeurAndDesactiveAndExpired(
+                token,
+                false,
+                false
+                ).orElseThrow(() -> new RuntimeException("Token not found"));
     }
 
     public Key getKey() {
@@ -56,10 +70,27 @@ public class JwtService {
         return this.getClaim(token, Claims::getSubject);
     }
 
+    public void deconnexion() {
+        Utilisateur utilisateur = (Utilisateur) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Jwt jwt = this.jwtRepository.findByUtilisateurValidToken(utilisateur.getEmail(),
+                        false,
+                        false)
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        jwt.setDesactive(true);
+        jwt.setExpired(true);
+        this.jwtRepository.save(jwt);
+    }
+
+    @Scheduled(cron = "@Daily")
+    @Scheduled(cron = "0 10 * * * *")
+    public void removeUselessToken() {
+        log.info("Suppression des tokens à {}: ", Instant.now());
+        this.jwtRepository.deleteAllByExpiredAndDesactive(true,true);
+    }
+
     private Map<String, String> generateJwtToken(Utilisateur utilisateur) {
         long currentTime = System.currentTimeMillis();
         long expirationTime = currentTime + 18000000;
-
         Map<String, Object> claims = Map.of(
                 "nom", utilisateur.getNom(),
                 Claims.EXPIRATION, new Date(expirationTime),
@@ -76,7 +107,6 @@ public class JwtService {
         return Map.of(BEARER, bearer);
     }
 
-
     private <T> T getClaim(String token, Function<Claims, T> claimsResolver) {
         Claims claims = getAllClaims(token);
         return claimsResolver.apply(claims);
@@ -89,15 +119,14 @@ public class JwtService {
                 .parseClaimsJws(token).getBody();
     }
 
-
-    public void deconnexion() {
-        Utilisateur utilisateur = (Utilisateur) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Jwt jwt = this.jwtRepository.findByUtilisateurValidToken(utilisateur.getEmail(),
-                false,
-                false)
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
-        jwt.setDesactive(true);
-        jwt.setExpired(true);
-        this.jwtRepository.save(jwt);
+    private void disableTokens(Utilisateur utilisateur) {
+        final List<Jwt> jwtList = this.jwtRepository.findByUtilisateur(utilisateur.getEmail()).peek(
+                jwt -> {
+                    jwt.setExpired(true);
+                    jwt.setDesactive(true);
+                }
+        ).collect(Collectors.toList());
+        this.jwtRepository.saveAll(jwtList);
     }
+
 }
