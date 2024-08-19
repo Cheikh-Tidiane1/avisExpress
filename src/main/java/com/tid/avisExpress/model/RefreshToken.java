@@ -1,6 +1,8 @@
 package com.tid.avisExpress.model;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.Instant;
 import java.util.Date;
 
 @Entity
@@ -16,5 +18,6 @@ public class RefreshToken {
     private Long id;
     private Boolean expired ;
     private String value ;
-    private Date createAt ;
+    private Instant createAt ;
+    private Instant expiration ;
 }

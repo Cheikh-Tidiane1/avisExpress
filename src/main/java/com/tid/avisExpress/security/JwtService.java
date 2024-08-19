@@ -1,5 +1,6 @@
 package com.tid.avisExpress.security;
 import com.tid.avisExpress.model.Jwt;
+import com.tid.avisExpress.model.RefreshToken;
 import com.tid.avisExpress.model.Utilisateur;
 import com.tid.avisExpress.repository.JwtRepository;
 import com.tid.avisExpress.services.UtilisateurService;
@@ -37,12 +38,18 @@ public class JwtService {
         Utilisateur utilisateur = (Utilisateur) this.utilisateurService.loadUserByUsername(username);
         this.disableTokens(utilisateur);
         Map<String, String> jwtMap = this.generateJwtToken(utilisateur);
+        RefreshToken refreshToken = RefreshToken.builder()
+                .expired(false)
+                .createAt(Instant.now())
+                .expiration(Instant.now().plusMillis(30 *60 * 1000))
+                .build();
         Jwt jwt = Jwt
                 .builder()
                 .valeur(jwtMap.get(BEARER))
                 .desactive(false)
                 .expired(false)
                 .utilisateur(utilisateur)
+                .refreshToken(refreshToken)
                 .build();
         this.jwtRepository.save(jwt);
         return jwtMap;
@@ -90,7 +97,7 @@ public class JwtService {
 
     private Map<String, String> generateJwtToken(Utilisateur utilisateur) {
         long currentTime = System.currentTimeMillis();
-        long expirationTime = currentTime + 18000000;
+        long expirationTime = currentTime + 60 * 1000;
         Map<String, Object> claims = Map.of(
                 "nom", utilisateur.getNom(),
                 Claims.EXPIRATION, new Date(expirationTime),
