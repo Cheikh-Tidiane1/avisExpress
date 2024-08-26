@@ -36,7 +36,8 @@ public class SecurityConfigurationApplication {
                         authorize -> authorize.requestMatchers(HttpMethod.POST,
                                         "/inscription",
                                         "/activation",
-                                        "/connexion")
+                                        "/connexion",
+                                        "/refreshToken")
                                 .permitAll()
                                 .anyRequest().
                                 authenticated())

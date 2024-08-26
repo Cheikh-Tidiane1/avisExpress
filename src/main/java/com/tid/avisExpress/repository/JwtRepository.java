@@ -13,6 +13,8 @@ public interface JwtRepository extends CrudRepository<Jwt, Integer> {
     Optional<Jwt> findByUtilisateurValidToken(String email, Boolean desactive, Boolean expired);
     @Query("FROM Jwt j WHERE j.utilisateur.email = :email")
     Stream<Jwt> findByUtilisateur(String email);
+    @Query("FROM Jwt j WHERE j.refreshToken.value = :value")
+    Optional<Jwt> findByRefreshToken (String value);
     void deleteAllByExpiredAndDesactive(Boolean expired, Boolean desactive);
 
 }

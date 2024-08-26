@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 @Transactional
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 public class JwtService {
 
     public static final String BEARER = "bearer";
+    public static final String REFRESH = "refresh";
     private final String ENCRYPTION_KEY = "c2fcf73009e0f67e893a63614b10ef16f9c78e153127f73dbf3e4fae8164139f";
     private JwtRepository jwtRepository ;
     private UtilisateurService utilisateurService;
@@ -37,8 +39,9 @@ public class JwtService {
     public Map<String, String> getJwtToken(String username) {
         Utilisateur utilisateur = (Utilisateur) this.utilisateurService.loadUserByUsername(username);
         this.disableTokens(utilisateur);
-        Map<String, String> jwtMap = this.generateJwtToken(utilisateur);
+        Map<String, String> jwtMap = new java.util.HashMap<>(this.generateJwtToken(utilisateur));
         RefreshToken refreshToken = RefreshToken.builder()
+                .value(UUID.randomUUID().toString())
                 .expired(false)
                 .createAt(Instant.now())
                 .expiration(Instant.now().plusMillis(30 *60 * 1000))
@@ -52,6 +55,7 @@ public class JwtService {
                 .refreshToken(refreshToken)
                 .build();
         this.jwtRepository.save(jwt);
+        jwtMap.put(REFRESH, refreshToken.getValue());
         return jwtMap;
     }
 
@@ -136,4 +140,12 @@ public class JwtService {
         this.jwtRepository.saveAll(jwtList);
     }
 
+    public Map<String, String>  refreshToken(Map<String, String> refreshTokenRequest) {
+        Jwt jwt = this.jwtRepository.findByRefreshToken(refreshTokenRequest.get(REFRESH)).orElseThrow(() -> new RuntimeException("Invalid token"));
+        if(jwt.getRefreshToken().getExpired() || jwt.getRefreshToken().getExpiration().isBefore(Instant.now())) {
+            throw new RuntimeException("Invalid token");
+        }
+        this.disableTokens(jwt.getUtilisateur());
+        return this.getJwtToken(jwt.getUtilisateur().getEmail());
+    }
 }

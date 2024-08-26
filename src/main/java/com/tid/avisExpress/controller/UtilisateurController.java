@@ -54,4 +54,10 @@ public class UtilisateurController {
         log.info("Déconnexion success ✅");
         this.jwtService.deconnexion();
     }
+
+
+    @PostMapping(path = "/refreshToken")
+    public Map<String,String> refreshToken(@RequestBody Map<String,String> refreshTokenRequest) {
+       return  this.jwtService.refreshToken(refreshTokenRequest);
+    }
 }
