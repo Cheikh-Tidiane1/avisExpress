@@ -37,7 +37,9 @@ public class SecurityConfigurationApplication {
                                         "/inscription",
                                         "/activation",
                                         "/connexion",
-                                        "/refreshToken")
+                                        "/refreshToken",
+                                        "/nouveauMdp",
+                                        "/modifierMdp")
                                 .permitAll()
                                 .anyRequest().
                                 authenticated())

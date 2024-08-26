@@ -60,4 +60,19 @@ public class UtilisateurService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return this.utilisateurRepository.findByEmail(username).orElseThrow(()-> new UsernameNotFoundException("Utilisateur non trouvé"));
     }
+
+    public void modifierMdp(Map<String, String> users) {
+        Utilisateur utilisateur = (Utilisateur) this.loadUserByUsername(users.get("email"));
+        this.validationService.enregistrer(utilisateur);
+    }
+
+    public void nouveauMdp(Map<String, String> users) {
+        Utilisateur utilisateur = (Utilisateur) this.loadUserByUsername(users.get("email"));
+        Validation validation = this.validationService.valideCode(users.get("code"));
+        if(validation.getUtilisateur().getEmail().equals(utilisateur.getEmail())){
+            String mdpCrypt = this.passwordEncoder.encode(users.get("password"));
+            utilisateur.setPassword(mdpCrypt);
+            this.utilisateurRepository.save(utilisateur);
+        }
+    }
 }

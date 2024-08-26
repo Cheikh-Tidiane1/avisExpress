@@ -5,12 +5,12 @@ import com.tid.avisExpress.repository.ValidationRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Random;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
-
+@Transactional
 @AllArgsConstructor
 @Service
 @Slf4j

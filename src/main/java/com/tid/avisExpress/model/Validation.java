@@ -18,6 +18,6 @@ public class Validation {
     private Instant creation;
     private Instant expire;
     private Instant activation;
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH})
     private Utilisateur utilisateur;
 }

@@ -60,4 +60,15 @@ public class UtilisateurController {
     public Map<String,String> refreshToken(@RequestBody Map<String,String> refreshTokenRequest) {
        return  this.jwtService.refreshToken(refreshTokenRequest);
     }
+
+
+    @PostMapping(path = "/modifierMdp")
+    public void modifierMdp(@RequestBody Map<String,String> users) {
+        this.utilisateurService.modifierMdp(users);
+    }
+
+    @PostMapping(path = "/nouveauMdp")
+    public void nouveauMdp(@RequestBody Map<String,String> users) {
+        this.utilisateurService.nouveauMdp(users);
+    }
 }
