@@ -28,6 +28,8 @@ public class Utilisateur implements UserDetails {
     private Role role;
     @OneToMany(mappedBy = "utilisateur")
     private List<Avis> avis;
+    @OneToMany(mappedBy = "utilisateur")
+    private List<PasswordReset> passwordResets;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

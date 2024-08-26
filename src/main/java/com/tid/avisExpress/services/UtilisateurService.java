@@ -1,8 +1,5 @@
 package com.tid.avisExpress.services;
-import com.tid.avisExpress.model.Role;
-import com.tid.avisExpress.model.TypeDeRole;
-import com.tid.avisExpress.model.Utilisateur;
-import com.tid.avisExpress.model.Validation;
+import com.tid.avisExpress.model.*;
 import com.tid.avisExpress.repository.UtilisateurRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -25,6 +22,7 @@ public class UtilisateurService implements UserDetailsService {
     private UtilisateurRepository utilisateurRepository;
     private BCryptPasswordEncoder passwordEncoder;
     private ValidationService validationService;
+    private PasswordResetService passwordResetService;
 
     public void inscription(Utilisateur utilisateur) {
         if(!utilisateur.getEmail().contains("@")){
@@ -63,13 +61,13 @@ public class UtilisateurService implements UserDetailsService {
 
     public void modifierMdp(Map<String, String> users) {
         Utilisateur utilisateur = (Utilisateur) this.loadUserByUsername(users.get("email"));
-        this.validationService.enregistrer(utilisateur);
+        this.passwordResetService.saveNewPasswordReset(utilisateur);
     }
 
     public void nouveauMdp(Map<String, String> users) {
         Utilisateur utilisateur = (Utilisateur) this.loadUserByUsername(users.get("email"));
-        Validation validation = this.validationService.valideCode(users.get("code"));
-        if(validation.getUtilisateur().getEmail().equals(utilisateur.getEmail())){
+        PasswordReset passwordReset = this.passwordResetService.validCode(users.get("code"));
+        if(passwordReset.getUtilisateur().getEmail().equals(utilisateur.getEmail())){
             String mdpCrypt = this.passwordEncoder.encode(users.get("password"));
             utilisateur.setPassword(mdpCrypt);
             this.utilisateurRepository.save(utilisateur);
