@@ -73,4 +73,8 @@ public class UtilisateurService implements UserDetailsService {
             this.utilisateurRepository.save(utilisateur);
         }
     }
+
+    public Iterable<Utilisateur> listUser() {
+        return this.utilisateurRepository.findAll();
+    }
 }

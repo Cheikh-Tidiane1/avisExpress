@@ -1,4 +1,5 @@
 package com.tid.avisExpress.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,6 +28,7 @@ public class Utilisateur implements UserDetails {
     @OneToOne(cascade = CascadeType.ALL)
     private Role role;
     @OneToMany(mappedBy = "utilisateur")
+    @JsonIgnore
     private List<Avis> avis;
     @OneToMany(mappedBy = "utilisateur")
     private List<PasswordReset> passwordResets;

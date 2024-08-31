@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @AllArgsConstructor
 @RestController
 public class AvisController {
@@ -19,5 +21,11 @@ public class AvisController {
         Utilisateur utilisateur = (Utilisateur) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         avis.setUtilisateur(utilisateur);
         this.avisService.createAvis(avis);
+    }
+
+
+    @GetMapping(path = "/allAvis")
+    public Iterable<Avis> listAvis() {
+        return this.avisService.listAvis();
     }
 }
